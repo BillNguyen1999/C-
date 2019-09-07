@@ -1,0 +1,229 @@
+\documentclass[12pt]{article}
+
+\usepackage{graphicx}
+\usepackage{paralist}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{hhline}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{multicol}
+\usepackage{url}
+
+\oddsidemargin -10mm
+\evensidemargin -10mm
+\textwidth 160mm
+\textheight 200mm
+\renewcommand\baselinestretch{1.0}
+
+\pagestyle {plain}
+\pagenumbering{arabic}
+
+\newcounter{stepnum}
+
+%% Comments
+
+\usepackage{color}
+
+\newif\ifcomments\commentstrue
+
+\ifcomments
+\newcommand{\authornote}[3]{\textcolor{#1}{[#3 ---#2]}}
+\newcommand{\todo}[1]{\textcolor{red}{[TODO: #1]}}
+\else
+\newcommand{\authornote}[3]{}
+\newcommand{\todo}[1]{}
+\fi
+
+\newcommand{\wss}[1]{\authornote{blue}{SS}{#1}}
+
+
+
+\begin {document}
+
+\begin{titlepage}
+   \vspace*{\stretch{1.0}}
+   \begin{center}
+      \Large\textbf{Assignment 4 Specification}\\
+      \large\text{SFWR ENG 2AA4}
+   \end{center}
+   \vspace*{\stretch{2.0}}
+\end{titlepage}
+
+\newpage
+
+\section* {Conway ADT Module}
+
+\subsection* {Template Module}
+
+Conway
+
+\subsection* {Uses}
+
+N/A
+
+\subsection* {Syntax}
+
+\subsubsection* {Exported Access Programs}
+
+% Stack(T) = ?
+
+% \subsubsection* {Exported Constants}
+
+% None
+
+
+\begin{tabular}{| l | l | l | p{5cm} |}
+\hline
+\textbf{Routine name} & \textbf{In} & \textbf{Out} & \textbf{Exceptions}\\
+\hline
+new Conway & input\_file : string & Conway & invalid\_argument\\
+\hline
+get\_matrix &  & Conway &  \\
+\hline
+get\_value & $\mathbb{N}$, $\mathbb{N}$ & $\mathbb{B}$ & out\_of\_range\\
+\hline
+set\_value & $\mathbb{N}$, $\mathbb{N}$ &  & out\_of\_range\\
+\hline
+remove\_value & $\mathbb{N}$, $\mathbb{N}$ &  & out\_of\_range\\
+\hline
+next& &  & \\
+\hline
+output\_graphics & & & invalid\_argument\\
+\hline
+\end{tabular}
+
+\subsection* {Semantics}
+
+\subsubsection* {Environment Variables}
+
+input : File of game with given input for a 7 by 7 board
+
+\subsubsection* {State Variables}
+
+matrix: Seq of Seq of $\mathbb{B}$ 
+
+\subsubsection* {State Invariant}
+
+$|matrix| = 7$\\
+size of each row is 7\\
+
+\newpage
+
+\subsubsection* {Assumptions \& Design Decisions}
+
+\begin{itemize}
+
+\item The Conway constructor is called before any other access
+  routine is called on that instance. Once a Conway has been created, the
+  constructor will not be called on it again.
+
+\item the vector class is used to represent a sequence.
+
+\item The value in the vector is only boolean type meaning only true or false (true means there is a point in the board and false means there is not a point on the board).
+
+\item The board is a 7 by 7 board.
+
+\item For the input file the board is represented by o's and x's (o's meaning there is no point and x's indicating points)
+
+\item For better scalability, this module is specified as an Abstract Data Type
+  (ADT) instead of an Abstract Object. This would allow multiple games to be
+  created and tracked at once by a client.
+
+\item Gettter and setter functions are provided for testing and gives users more flexibility in terms of creating the board.
+
+\item The rows and columns are in range 0 to 6 (not 1 to 7).
+
+\item My version of Conway's game of life works exactly like this version https://academo.org/demos/conways-game-of-life/
+
+
+\end{itemize}
+
+\newpage
+
+\subsubsection* {Access Routine Semantics}
+
+\noindent Conway($input\_file$):
+\begin{itemize}
+
+\item transition: reads data from the file input that is associated with the string input\_file. After it uses this file to create a sequence of sequences of booleans based on what is on the file (x's become true and o's become false). Next the state variable matrix is assigned this specific sequence and the variable is called matrix since this sequence acts like a matrix. 
+
+An example of a correct file would be: 
+
+o o o o x x o\\
+o o o o x x o\\
+o o o o x x o\\
+o o o o x x o\\
+o x x x o x o\\
+o o o o o x o\\
+o o o o o o o\\
+
+\item exception: if the file cannot be found the exception called invalid\_argument will be raised
+\end{itemize}
+
+\noindent get\_matrix():
+\begin{itemize}
+\item output: $out := matrix$
+\item exception: None
+\end{itemize}
+
+\noindent get\_value($row, column$):
+\begin{itemize}
+\item output: $out := matrix[row][column]$
+\item exception: if row or column is less than 0 or greater than 6 it will raise an out\_of\_range error.
+\end{itemize}
+
+\noindent set\_value($row, column$):
+\begin{itemize}
+\item transition: $matrix[row][column] := true$
+\item exception: if row or column is less than 0 or greater than 6 it will raise an out\_of\_range error.
+\end{itemize}
+
+\newpage
+
+\noindent remove\_value($row, column$):
+\begin{itemize}
+\item transition: $matrix[row][column] := false$
+\item exception: if row or column is less than 0 or greater than 6 it will raise an out\_of\_range error.
+\end{itemize}
+
+\noindent next():
+\begin{itemize}
+\item transition: Loop through sequence (index i) and all sequences inside the sequence (index j). have a counter to count how many points around the desired point are equal to true. Next for each iteration if counter is greater than 3 or less than 2 and matrix[i][j] is equal to true than matrix[i][j] becomes false. 
+% \item transition: counter $:=$ + $$(\forall \text{i} : \mathbb{N}: \forall \text{j} : \mathbb{N} | 0 \leq i \leq 7 \land 0 \leq j \leq 7 
+% : 1$$
+\end{itemize}
+
+\noindent ouput\_graphic():
+\begin{itemize}
+\item transition: goes through the matrix and creates a textfile called output.txt which is board similar to the input textfile. If matrix[row][column] = false then it would become o in the textfile and if it is true then it would become x in the textfile.
+
+\item exception: if file cannot be written an invalid\_argument will be raised.
+
+\end{itemize}
+
+\newpage
+
+\section*{Critique of Design}
+
+\subsection*{Consistency}
+
+One way I tried to make this consistent is by only using a 7 by 7 matrix, since it would make it easier for me to design and would also help avoid unusual user inputs such as having a large/infinite matrix and also having a very small matrix such as 1 by 1 or 0 by 0. Ways I implemented this rule is for the constructor it only reads the first 49 inputs in the text file leading to only be 7 by 7 and in the getter and setter methods if you input a row or column that is not in this range it will throw an exception to prevent this from happening.
+
+\subsection*{Essentiality}
+
+In terms of essentiality everything in this specification is essential except for get\_value. The function get\_value is not essential since you can get the value by using get matrix (Ex. object.get\_matrix[0][0]). The reason why I added the function get\_value is because some individuals may not to think to use get\_matrix to obtain the value and get\_value makes it much easier to get the specific value the user wants.
+
+\subsection*{Generality}
+When looking at generality I believe my design is not that general because everything is specific to the game. One example is that an individual can only use a 7 by 7 matrix which gives them less variety. Also in terms of the next function I just followed this version https://academo.org/demos/conways-game-of-life/, so there not much ambiguity for edge cases such as what do for points in the corners etc... 
+
+\subsection*{Minimality}
+In terms of minimality almost every function is minimal (Ex. for the set\_value it only sets the value to true and doesn't return anything) but one function that is no minimal is the constructor. The constructor is not minimal since it does two things, reads the file and makes the matrix. The reason why I decided to not make a read function was I only read a text file in the constructor and no where else.
+
+\subsection*{Cohesion}
+In terms of each function every function has a relationship with the matrix meaning it would have high cohesion. For the get\_value and get\_matrix it shows the matrix or value to the user and for the other functions it involves some form of updating the matrix. And for output\_graphic it converts the matrix and puts the matrix into the text file.
+
+\subsection*{Information Hiding}
+Finally for information hiding the user can only call the available functions in the specification and cannot see any of the code inside each method. One thing lacking is there are no local functions but this is because there isn't that much need for local functions.
+
+\end {document}
