@@ -1,0 +1,2 @@
+- This is the game 40 Thieves Solitaire using C++
+- https://greenfelt.net/fortythieves this is the link of the game to get a better understanding of how it works
